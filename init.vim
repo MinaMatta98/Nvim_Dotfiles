@@ -238,4 +238,3 @@ let g:vimtex_compiler_method = 'latexmk'
 let maplocalleader = " "
 
 let g:magma_automatically_open_output = v:false
-
