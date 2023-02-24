@@ -743,7 +743,7 @@ cmp.setup({
 		documentation = cmp.config.window.bordered(),
 	},
 	mapping = cmp.mapping.preset.insert({
-		["<C-UP>"] = cmp.mapping.scroll_docs( -4),
+		["<C-UP>"] = cmp.mapping.scroll_docs(-4),
 		["<C-DOWN>"] = cmp.mapping.scroll_docs(4),
 		["<C-Enter>"] = cmp.mapping.complete(),
 		["<C-e>"] = cmp.mapping.abort(),
@@ -769,12 +769,12 @@ cmp.setup({
 			vim_item.kind = string.format("%s %s", kind_icons[vim_item.kind], vim_item.kind) -- This concatonates the icons with the name of the item kind
 			-- Source
 			vim_item.menu = ({
-					buffer = "[Buffer]",
-					nvim_lsp = "[LSP]",
-					luasnip = "[LuaSnip]",
-					nvim_lua = "[Lua]",
-					latex_symbols = "[LaTeX]",
-				})[entry.source.name]
+				buffer = "[Buffer]",
+				nvim_lsp = "[LSP]",
+				luasnip = "[LuaSnip]",
+				nvim_lua = "[Lua]",
+				latex_symbols = "[LaTeX]",
+			})[entry.source.name]
 			return vim_item
 		end,
 	},
@@ -855,10 +855,10 @@ local treeconfig = {
 		mappings = {
 			custom_only = false,
 			list = {
-				{ key = "l", action = "edit",           action_cb = edit_or_open },
+				{ key = "l", action = "edit", action_cb = edit_or_open },
 				{ key = "L", action = "vsplit_preview", action_cb = vsplit_preview },
 				{ key = "h", action = "close_node" },
-				{ key = "H", action = "collapse_all",   action_cb = collapse_all },
+				{ key = "H", action = "collapse_all", action_cb = collapse_all },
 			},
 		},
 	},
