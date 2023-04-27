@@ -19,6 +19,7 @@ runtime! archlinux.vim
 " set synmaxcol=12
 set encoding=utf-8
 set fileencoding=utf-8
+set filetype
 let skip_defaults_vim=1
 set clipboard+=unnamedplus
 set cmdheight=0
@@ -39,7 +40,7 @@ filetype plugin indent on
 set smartindent
 set suffixesadd=.lua
 let mapleader = " "
-au BufRead,BufNewFile *.turtle,*.ttl set filetype=turtle
+" au BufRead,BufNewFile *.turtle,*.ttl set filetype=turtle
 " set listchars=tab:
 " set list
 " set listchars=tab:\ \ ┊,trail:●,extends:…,precedes:…
@@ -80,6 +81,7 @@ endif
 
 call plug#begin()
 Plug 'catppuccin/nvim', { 'as': 'catppuccin' }
+Plug 'dstein64/vim-startuptime'
 Plug 'airblade/vim-gitgutter'
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install' }
@@ -97,6 +99,7 @@ Plug 'hrsh7th/cmp-cmdline'
 Plug 'hrsh7th/cmp-vsnip'
 Plug 'hrsh7th/nvim-cmp'
 Plug 'L3MON4D3/LuaSnip'
+Plug 'prichrd/netrw.nvim'
 Plug 'saadparwaiz1/cmp_luasnip'
 " Plug 'ms-jpq/coq.artifacts', {'branch': 'artifacts'}
 " Plug 'ms-jpq/coq_nvim', {'branch': 'coq'}
@@ -157,10 +160,11 @@ Plug 'lervag/vimtex'
 Plug 'xuhdev/vim-latex-live-preview', { 'for': 'tex' }
 Plug 'neomake/neomake'
 Plug 'iurimateus/luasnip-latex-snippets.nvim'
-Plug 'tanvirtin/vgit.nvim'
+Plug 'tanvirtin/vgit.nvim', { 'commit' : '618471f' }
 Plug 'mattn/webapi-vim'
 Plug 'sharkdp/fd'
 Plug 'BurntSushi/ripgrep'
+Plug 'saecki/crates.nvim', { 'tag': 'v0.3.0' }
 call plug#end()
 
 " let g:onedark_config = {
@@ -212,8 +216,7 @@ lua require('init')
 set encoding=UTF-8
 " hi CurrentWord guibg=#31313a
 hi BufferTabpageFill guibg='#222436'
-" lua require('dap-python').setup('~/.virtualenvs/debugpy/bin/python')
-highlight IndentBlanklineContextChar guifg=gray gui=nocombine
+" highlight IndentBlanklineContextChar guifg=gray gui=nocombine
 " gray
 highlight! CmpItemAbbrDeprecated guibg=NONE gui=strikethrough guifg=#808080
 " blue
