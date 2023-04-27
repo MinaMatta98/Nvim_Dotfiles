@@ -47,7 +47,7 @@ require("impatient").enable_profile()
 -- })
 
 -- require("onedark").load()
-vim.cmd("colorscheme tokyonight-moon")
+vim.cmd("colorscheme tokyonight")
 -- vim.cmd("colorscheme catppuccin-frappe")
 require("lualine").setup({
 	sections = {
@@ -64,7 +64,6 @@ require("lualine").setup({
 				-- icon position can also be set to the right side from table. Example:
 				-- {'branch', icon = {'', align='right', color={fg='green'}}}
 				icon = nil,
-
 				separator = nil, -- Determines what separator to use for the component.
 				-- Note:
 				--  When a string is provided it's treated as component_separator.
@@ -82,7 +81,6 @@ require("lualine").setup({
 				--
 
 				cond = nil, -- Condition function, the component is loaded when the function returns `true`.
-
 				-- Defines a custom color for the component:
 				--
 				-- 'highlight_group_name' | { fg = '#rrggbb'|cterm_value(0-255)|'color_name(red)', bg= '#rrggbb', gui='style' } | function
@@ -99,7 +97,6 @@ require("lualine").setup({
 				--      return { fg = vim.bo.modified and '#aa3355' or '#33aa88' }
 				--   end,
 				color = nil, -- The default is your theme's color for that section and mode.
-
 				-- Specify what type a component is, if omitted, lualine will guess it for you.
 				--
 				-- Available types are:
@@ -110,7 +107,6 @@ require("lualine").setup({
 				-- Note:
 				-- lua_expr is short for lua-expression and vim_fun is short for vim-function.
 				type = nil,
-
 				padding = 1, -- Adds padding to the left and right of components.
 				-- Padding can be specified to left or right independently, e.g.:
 				--   padding = { left = left_padding, right = right_padding }
@@ -127,6 +123,8 @@ require("lualine").setup({
 })
 
 local on_attach = function(client, bufnr)
+	vim.opt.pumblend = 0
+	-- Set the highlight group for the background color
 	-- require("lsp-inlayhints").setup()
 	-- vim.api.nvim_create_augroup("LspAttach_inlayhints", {})
 	-- vim.api.nvim_create_autocmd("LspAttach", {
@@ -164,151 +162,41 @@ local on_attach = function(client, bufnr)
 	--   end
 	-- Enable completion triggered by <c-x><c-o>
 
-	local bufopts = { noremap = true, silent = true, buffer = bufnr }
+	if client.name == "rust_analyzer" then
+		vim.keymap.set(
+			"n",
+			"<leader>O",
+			"<cmd>lua require'rust-tools'.open_cargo_toml.open_cargo_toml()<CR>",
+			{ buffer = bufnr }
+		)
+		vim.keymap.set("n", "<leader>R", "<cmd>RustRun<CR>", { buffer = bufnr })
+		vim.keymap.set("n", "<leader>A", "<cmd>RustCodeAction<CR>", { buffer = bufnr })
+	end
+
 	if client.name == "texlab" then
 		require("luasnip.loaders.from_vscode").lazy_load()
 		require("luasnip-latex-snippets").setup({})
 	end
 
-	if client.name == "rust_analyzer" then
-		require("rust-tools").setup({
-			{
-				tools = { -- rust-tools options
-					-- Automatically set inlay hints (type hints)
-					autoSetHints = true,
-					executor = require("rust-tools.executors").termopen,
-					-- Whether to show hover actions inside the hover window
-					-- This overrides the default hover handler
-					hover_with_actions = true,
-
-					runnables = {
-						-- whether to use telescope for selection menu or not
-						use_telescope = true,
-
-						-- rest of the opts are forwarded to telescope
-					},
-
-					debuggables = {
-						-- whether to use telescope for selection menu or not
-						use_telescope = true,
-
-						-- rest of the opts are forwarded to telescope
-					},
-
-					-- These apply to the default RustSetInlayHints command
-					inlay_hints = {
-						auto = true,
-						-- Only show inlay hints for the current line
-						only_current_line = false,
-
-						-- Event which triggers a refersh of the inlay hints.
-						-- You can make this "CursorMoved" or "CursorMoved,CursorMovedI" but
-						-- not that this may cause  higher CPU usage.
-						-- This option is only respected when only_current_line and
-						-- autoSetHints both are true.
-						only_current_line_autocmd = "CursorHold",
-
-						-- wheter to show parameter hints with the inlay hints or not
-						show_parameter_hints = true,
-
-						-- prefix for parameter hints
-						parameter_hints_prefix = "<- ",
-
-						-- prefix for all the other hints (type, chaining)
-						other_hints_prefix = "=> ",
-
-						-- whether to align to the length of the longest line in the file
-						max_len_align = false,
-
-						-- padding from the left if max_len_align is true
-						max_len_align_padding = 1,
-
-						-- whether to align to the extreme right or not
-						right_align = false,
-
-						-- padding from the right if right_align is true
-						right_align_padding = 7,
-
-						-- The color of the hints
-						highlight = "Comment",
-					},
-
-					hover_actions = {
-						-- the border that is used for the hover window
-						-- see vim.api.nvim_open_win()
-						border = {
-							{ "╭", "FloatBorder" },
-							{ "─", "FloatBorder" },
-							{ "╮", "FloatBorder" },
-							{ "│", "FloatBorder" },
-							{ "╯", "FloatBorder" },
-							{ "─", "FloatBorder" },
-							{ "╰", "FloatBorder" },
-							{ "│", "FloatBorder" },
-						},
-
-						-- whether the hover action window gets automatically focused
-						auto_focus = false,
-					},
-
-					-- settings for showing the crate graph based on graphviz and the dot
-					-- command
-					crate_graph = {
-						-- Backend used for displaying the graph
-						-- see: https://graphviz.org/docs/outputs/
-						-- default: x11
-						backend = "x11",
-						-- where to store the output, nil for no output stored (relative
-						-- path from pwd)
-						-- default: nil
-						output = nil,
-						-- true for all crates.io and external crates, false only the local
-						-- crates
-						-- default: true
-						full = true,
-					},
-				},
-
-				-- all the opts to send to nvim-lspconfig
-				-- these override the defaults set by rust-tools.nvim
-				-- see https://github.com/neovim/nvim-lspconfig/blob/master/CONFIG.md#rust_analyzer
-				server = {
-					on_attach = function()
-						-- Hover actions
-						vim.keymap.set("n", "<C-g>", rt.hover_actions.hover_actions, { buffer = bufnr })
-						-- Code action groups
-						vim.keymap.set("n", "<Leader>a", rt.code_action_group.code_action_group, { buffer = bufnr })
-					end,
-				},
-				dap = {
-					adapter = {
-						type = "executable",
-						command = "lldb-vscode",
-						name = "rt_lldb",
-					},
-				},
-			},
-		})
-	end
-	require("nvim-autopairs").setup({})
-
+	-- require("nvim-autopairs").setup({})
 	require("nvim-dap-virtual-text").setup({
-		enabled = true, -- enable this plugin (the default)
-		enabled_commands = true, -- create commands DapVirtualTextEnable, DapVirtualTextDisable, DapVirtualTextToggle, (DapVirtualTextForceRefresh for refreshing when debug adapter did not notify its termination)
+		enabled = true,                  -- enable this plugin (the default)
+		enabled_commands = true,         -- create commands DapVirtualTextEnable, DapVirtualTextDisable, DapVirtualTextToggle, (DapVirtualTextForceRefresh for refreshing when debug adapter did not notify its termination)
 		highlight_changed_variables = true, -- highlight changed values with NvimDapVirtualTextChanged, else always NvimDapVirtualText
 		highlight_new_as_changed = false, -- highlight new variables in the same way as changed variables (if highlight_changed_variables)
-		show_stop_reason = true, -- show stop reason when stopped for exceptions
-		commented = false, -- prefix virtual text with comment string
-		only_first_definition = true, -- only show virtual text at first definition (if there are multiple)
-		all_references = false, -- show virtual text on all all references of the variable (not only definitions)
+		show_stop_reason = true,         -- show stop reason when stopped for exceptions
+		commented = false,               -- prefix virtual text with comment string
+		only_first_definition = true,    -- only show virtual text at first definition (if there are multiple)
+		all_references = false,          -- show virtual text on all all references of the variable (not only definitions)
 		filter_references_pattern = "<module", -- filter references (not definitions) pattern when all_references is activated (Lua gmatch pattern, default filters out Python modules)
 		-- experimental features:
-		virt_text_pos = "eol", -- position of virtual text, see `:h nvim_buf_set_extmark()`
-		all_frames = false, -- show virtual text for all stack frames not only current. Only works for debugpy on my machine.
-		virt_lines = false, -- show virtual lines instead of virtual text (will flicker!)
-		virt_text_win_col = nil, -- position the virtual text at a fixed window column (starting from the first text column) ,
+		virt_text_pos = "eol",           -- position of virtual text, see `:h nvim_buf_set_extmark()`
+		all_frames = false,              -- show virtual text for all stack frames not only current. Only works for debugpy on my machine.
+		virt_lines = false,              -- show virtual lines instead of virtual text (will flicker!)
+		virt_text_win_col = nil,         -- position the virtual text at a fixed window column (starting from the first text column) ,
 		-- e.g. 80 to position at column 80, see `:h nvim_buf_set_extmark()`
 	})
+
 	require("dapui").setup({
 		icons = { expanded = "", collapsed = "", current_frame = "" },
 		mappings = {
@@ -451,7 +339,7 @@ local on_attach = function(client, bufnr)
 
 	require("neogen").setup({
 		snippet_engine = "luasnip",
-		enabled = true, --if you want to disable Neogen
+		enabled = true,       --if you want to disable Neogen
 		input_after_comment = true, -- (default: true) automatic jump (with insert mode) on inserted annotation
 		-- jump_map = "<C-e>"       -- (DROPPED SUPPORT, see [here](#cycle-between-annotations) !) The keymap in order to jump in the annotation fields (in insert mode)
 		languages = {
@@ -478,20 +366,22 @@ local on_attach = function(client, bufnr)
 	-- See `:help vim.lsp.*` for documentation on any of the below functions
 	local bufopts = { noremap = true, silent = true, buffer = bufnr }
 
-	vim.keymap.set("n", "gd", vim.lsp.buf.definition, bufopts)
-	vim.keymap.set("n", "gt", vim.lsp.buf.type_definition, bufopts)
-	vim.keymap.set("n", "gi", vim.lsp.buf.implementation, bufopts)
-	vim.keymap.set("i", "<c-s>", vim.lsp.buf.signature_help, bufopts)
-	vim.keymap.set("n", "<c-s>", vim.lsp.buf.signature_help, bufopts)
+	vim.keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", bufopts)
+	vim.keymap.set("n", "gt", "<cmd>lua vim.lsp.buf.type_definition()<CR>", bufopts)
+	vim.keymap.set("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>", bufopts)
+	vim.keymap.set("i", "<c-s>", "<cmd>lua vim.lsp.buf.signature_help()<CR>", bufopts)
+	vim.keymap.set("n", "<c-s>", "<cmd>lua vim.lsp.buf.signature_help()<CR>", bufopts)
 	vim.keymap.set("n", "gD", "<cmd>lua require('telescope.builtin').diagnostics()<CR>", bufopts)
 	vim.keymap.set("n", "K", vim.lsp.buf.hover, bufopts)
-	vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename, bufopts)
-	vim.keymap.set("n", "gr", vim.lsp.buf.references, bufopts)
+	vim.keymap.set("n", "<leader>r", "<cmd>lua vim.lsp.buf.rename()<CR>", bufopts)
+	vim.keymap.set("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", bufopts)
 	vim.keymap.set("n", "<F2>", "<cmd>lua require'dap'.step_over()<CR>", bufopts)
 	vim.keymap.set("n", "<F1>", "<cmd>lua require'dap'.step_into()<CR>", bufopts)
 	vim.keymap.set("n", "<F3>", "<cmd>lua require'dap'.step_out()<CR>", bufopts)
 	vim.keymap.set("n", "<space>dl", "<cmd>lua require'dapui'.open()<CR>", bufopts)
 	vim.keymap.set("n", "<leader>C", "<cmd>lua require'dap'.toggle_breakpoint()<CR>", bufopts)
+	vim.keymap.set("n", "<leader>tws", "<cmd>lua require('telescope.builtin').lsp_workspace_symbols()<CR>", bufopts)
+	vim.keymap.set("n", "<leader>ts", "<cmd>lua require('telescope.builtin').lsp_document_symbols()<CR>", bufopts)
 	vim.keymap.set(
 		"n",
 		"<leader>B",
@@ -505,17 +395,6 @@ local on_attach = function(client, bufnr)
 	vim.keymap.set("n", "<leader>js", "<cmd>MagmaShowOutput<CR>", bufopts)
 	vim.keymap.set("n", "<leader>jd", "<cmd>MagmaDelete<CR>", bufopts)
 	vim.keymap.set("v", "<leader>ds", "<ESC>:lua require('dap-python').debug_selection()<CR>", bufopts)
-
-	if client.name == "rust_analyzer" then
-		vim.keymap.set(
-			"n",
-			"<leader>O",
-			"<cmd>lua require'rust-tools'.open_cargo_toml.open_cargo_toml()<CR>",
-			{ buffer = bufnr }
-		)
-		vim.keymap.set("n", "<leader>R", "<cmd>RustRun<CR>", { buffer = bufnr })
-		vim.keymap.set("n", "<leader>A", "<cmd>RustCodeAction<CR>", { buffer = bufnr })
-	end
 
 	local signs = {
 		Error = " ",
@@ -541,6 +420,8 @@ local on_attach = function(client, bufnr)
 	vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
 		border = "rounded",
 	})
+	vim.lsp.handlers["textDocument/signatureHelp"] =
+		vim.lsp.with(vim.lsp.handlers.signature_help, { border = "rounded" })
 
 	vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
 		border = "rounded",
@@ -555,7 +436,6 @@ local on_attach = function(client, bufnr)
 	vim.lsp.handlers["textDocument/definition"] = builtin.lsp_definitions
 	vim.lsp.handlers["textDocument/declaration"] = builtin.lsp_declarations
 	vim.lsp.handlers["textDocument/typeDefinition"] = builtin.lsp_type_definitions
-	vim.lsp.handlers["textDocument/implementation"] = builtin.lsp_implementation
 	vim.lsp.handlers["textDocument/references"] = builtin.lsp_references
 	vim.lsp.handlers["textDocument/documentSymbol"] = builtin.lsp_document_symbols
 	vim.lsp.handlers["workspace/symbol"] = builtin.lsp_workspace_symbols
@@ -612,94 +492,115 @@ require("mason").setup({
 	},
 })
 
-require("mason-lspconfig").setup()
-require("mason-nvim-dap").setup({
-	automatic_setup = true,
+require("mason-lspconfig").setup({
+	ensure_installed = {
+		"bashls",
+		"cssmodules_ls",
+		"emmet_ls",
+		"pyright",
+		"clangd",
+		"lua_ls",
+		"rome",
+		"bashls",
+		"yamlls",
+		"html",
+		"vimls",
+		"rust_analyzer",
+	},
 })
 
+-- require("mason-nvim-dap").setup({
+-- 	ensure_installed = {"codelldb"}
+-- })
+
 require("mason-nvim-dap").setup({
-	ensure_installed = { "stylua", "jq", "debugpy", "clangd" },
+	automatic_setup = true,
+	ensure_installed = { "stylua", "jq", "debugpy", "clangd", "codelldb" },
 })
 
 local dap = require("dap")
-require("mason-nvim-dap").setup_handlers({
-	function(source_name)
-		-- all sources with no handler get passed here
+-- require("mason-nvim-dap").setup_handlers({
+-- 	function(source_name)
+-- 		-- all sources with no handler get passed here
 
-		-- Keep original functionality of `automatic_setup = true`
-		require("mason-nvim-dap.automatic_setup")(source_name)
-	end,
-	python = function(source_name)
-		dap.adapters.python = {
-			type = "executable",
-			command = "/usr/bin/python3",
-			args = {
-				"-m",
-				"debugpy.adapter",
-			},
-		}
+-- 		-- Keep original functionality of `automatic_setup = true`
+-- 		require("mason-nvim-dap.automatic_setup")(source_name)
+-- 	end,
+-- 	python = function(source_name)
+-- 		dap.adapters.python = {
+-- 			type = "executable",
+-- 			command = "/usr/bin/python3",
+-- 			args = {
+-- 				"-m",
+-- 				"debugpy.adapter",
+-- 			},
+-- 		}
 
-		dap.configurations.python = {
-			{
-				type = "python",
-				request = "launch",
-				justMyCode = false,
-				name = "Launch file",
-				program = "${file}", -- This configuration will launch the current file if used.
-			},
-		}
+-- 		dap.configurations.python = {
+-- 			{
+-- 				type = "python",
+-- 				request = "launch",
+-- 				justMyCode = false,
+-- 				name = "Launch file",
+-- 				program = "${file}", -- This configuration will launch the current file if used.
+-- 			},
+-- 		}
 
-		dap.adapters.cpp = {
-			type = "executable",
-			command = "lldb-vscode",
-			env = {
-				LLDB_LAUNCH_FLAG_LAUNCH_IN_TTY = "YES",
-			},
-			stopAtEntry = true,
-			name = "lldb",
-		}
-		dap.configurations.cpp = {
-			{
-				name = "Launch",
-				type = "cpp",
-				request = "launch",
-				-- processId = require('dap.utils').pick_process,
-				mode = "local",
-				program = function()
-					return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/" .. vim.fn.expand("%:t:r"))
-				end,
-				cwd = "${workspaceFolder}",
-				args = {},
-				setupCommands = {
-					{
-						text = "-enable-pretty-printing",
-						description = "enable pretty printing",
-						ignoreFailures = false,
-					},
-				},
-			},
-			-- {
-			-- name = 'Attach to gdbserver :1234',
-			-- type = 'cpp',
-			-- request = 'launch',
-			-- MIMode = 'gdb',
-			-- miDebuggerServerAddress = 'localhost:1234',
-			-- miDebuggerPath = '/usr/bin/gdb',
-			-- cwd = '${workspaceFolder}',
-			-- program = function()
-			-- return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
-			-- end,
-			-- stopAtEntry = true,
-			-- },
-		}
-		dap.configurations.c = dap.configurations.cpp
-	end,
-})
+-- 		dap.adapters.cpp = {
+-- 			type = "executable",
+-- 			command = "lldb-vscode",
+-- 			env = {
+-- 				LLDB_LAUNCH_FLAG_LAUNCH_IN_TTY = "YES",
+-- 			},
+-- 			stopAtEntry = true,
+-- 			name = "lldb",
+-- 		}
+-- 		dap.configurations.cpp = {
+-- 			{
+-- 				name = "Launch",
+-- 				type = "cpp",
+-- 				request = "launch",
+-- 				-- processId = require('dap.utils').pick_process,
+-- 				mode = "local",
+-- 				program = function()
+-- 					return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/" .. vim.fn.expand("%:t:r"))
+-- 				end,
+-- 				cwd = "${workspaceFolder}",
+-- 				args = {},
+-- 				setupCommands = {
+-- 					{
+-- 						text = "-enable-pretty-printing",
+-- 						description = "enable pretty printing",
+-- 						ignoreFailures = false,
+-- 					},
+-- 				},
+-- 			},
+-- 			-- {
+-- 			-- name = 'Attach to gdbserver :1234',
+-- 			-- type = 'cpp',
+-- 			-- request = 'launch',
+-- 			-- MIMode = 'gdb',
+-- 			-- miDebuggerServerAddress = 'localhost:1234',
+-- 			-- miDebuggerPath = '/usr/bin/gdb',
+-- 			-- cwd = '${workspaceFolder}',
+-- 			-- program = function()
+-- 			-- return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+-- 			-- end,
+-- 			-- stopAtEntry = true,
+-- 			-- },
+-- 		}
+-- 		dap.configurations.c = dap.configurations.cpp
+-- 	end,
+-- })
+
 require("mason-null-ls").setup({
 	automatic_setup = true,
 	automatic_installation = true,
+	ensure_installed = { "stylua", "shellharden", "astyle", "black", "beautysh", "cpptools", "yamlfmt" },
 })
-require("mason-null-ls").setup_handlers()
+
+-- require("mason-null-ls").setup_handlers()
+
 local kind_icons = {
 	Text = "",
 	Method = "",
@@ -727,6 +628,7 @@ local kind_icons = {
 	Operator = "",
 	TypeParameter = "",
 }
+
 local cmp = require("cmp")
 cmp.setup({
 	snippet = {
@@ -739,8 +641,17 @@ cmp.setup({
 		end,
 	},
 	window = {
-		completion = cmp.config.window.bordered(),
-		documentation = cmp.config.window.bordered(),
+		completion = cmp.config.window.bordered({
+			side_padding = 0,
+			scrolloff = 0,
+			col_offset = 0,
+			winhighlight = "Normal:Normal,FloatBorder:Normal,CursorLine:PmenuSel,Search:None",
+		}),
+		documentation = cmp.config.window.bordered({
+			col_offset = 0,
+			side_padding = 0,
+			winhighlight = "Normal:Normal,FloatBorder:Normal,CursorLine:PmenuSbar,Search:None",
+		}),
 	},
 	mapping = cmp.mapping.preset.insert({
 		["<C-UP>"] = cmp.mapping.scroll_docs(-4),
@@ -755,6 +666,7 @@ cmp.setup({
 		{ name = "nvim_lsp_signature_help" },
 		{ name = "nvim_lsp" },
 		{ name = "path" },
+		{ name = "crates" },
 		-- { name = 'vsnip' }, -- For vsnip users.
 		{ name = "luasnip" }, -- For luasnip users.
 		-- { name = 'ultisnips' }, -- For ultisnips users.
@@ -855,10 +767,10 @@ local treeconfig = {
 		mappings = {
 			custom_only = false,
 			list = {
-				{ key = "l", action = "edit", action_cb = edit_or_open },
+				{ key = "l", action = "edit",           action_cb = edit_or_open },
 				{ key = "L", action = "vsplit_preview", action_cb = vsplit_preview },
 				{ key = "h", action = "close_node" },
-				{ key = "H", action = "collapse_all", action_cb = collapse_all },
+				{ key = "H", action = "collapse_all",   action_cb = collapse_all },
 			},
 		},
 	},
@@ -872,6 +784,7 @@ local treeconfig = {
 		update_cwd = true,
 	},
 }
+
 vim.api.nvim_set_keymap("n", "<C-f>", ":NvimTreeToggle<cr>", { silent = true, noremap = true })
 require("nvim-tree").setup(treeconfig)
 
@@ -929,50 +842,16 @@ require("nvim-navic").setup({
 	safe_output = false,
 })
 
-require("lspconfig").vimls.setup({
-	require("cmp_nvim_lsp").default_capabilities(),
-	on_attach = on_attach,
-})
+local list =
+{ "vimls", "yamlls", "rome", "bashls", "texlab", "lua_ls", "cssmodules_ls", "pyright", "emmet_ls", "lemminx" }
 
-require("lspconfig").yamlls.setup({
-	require("cmp_nvim_lsp").default_capabilities(),
-	on_attach = on_attach,
-})
+for _, server_name in ipairs(list) do
+	require("lspconfig")[server_name].setup({
+		capabilities = require("cmp_nvim_lsp").default_capabilities(),
+		on_attach = on_attach,
+	})
+end
 
-require("lspconfig").rome.setup({
-	require("cmp_nvim_lsp").default_capabilities(),
-	on_attach = on_attach,
-})
-
-require("lspconfig").bashls.setup({
-	require("cmp_nvim_lsp").default_capabilities(),
-	on_attach = on_attach,
-})
-
-require("lspconfig").texlab.setup({
-	require("cmp_nvim_lsp").default_capabilities(),
-	on_attach = on_attach,
-})
-
--- require("lspconfig").turtle_ls.setup({
--- 	require("cmp_nvim_lsp").default_capabilities(),
--- 	on_attach = on_attach,
--- })
-
-require("lspconfig").lua_ls.setup({
-	require("cmp_nvim_lsp").default_capabilities(),
-	on_attach = on_attach,
-})
-
-require("lspconfig").cssmodules_ls.setup({
-	require("cmp_nvim_lsp").default_capabilities(),
-	on_attach = on_attach,
-})
-
-require("lspconfig").pyright.setup({
-	require("cmp_nvim_lsp").default_capabilities(),
-	on_attach = on_attach,
-})
 
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities.offsetEncoding = { "utf-16" }
@@ -983,11 +862,6 @@ require("lspconfig").clangd.setup({
 	capabilities = capabilities,
 })
 
-require("lspconfig").emmet_ls.setup({
-	require("cmp_nvim_lsp").default_capabilities(),
-	on_attach = on_attach,
-})
-
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 
@@ -996,20 +870,7 @@ require("lspconfig").html.setup({
 	on_attach = on_attach,
 	capabilities = capabilities,
 })
-require("lspconfig").phpactor.setup({
-	require("cmp_nvim_lsp").default_capabilities(),
-	on_attach = on_attach,
-})
 
-require("lspconfig")["rust_analyzer"].setup({
-	require("cmp_nvim_lsp").default_capabilities(),
-	on_attach = on_attach,
-})
-
-require("lspconfig").lemminx.setup({
-	require("cmp_nvim_lsp").default_capabilities(),
-	on_attach = on_attach,
-})
 require("lspconfig").tsserver.setup({
 	require("cmp_nvim_lsp").default_capabilities(),
 	on_attach = on_attach,
@@ -1064,7 +925,7 @@ require("nvim-treesitter.configs").setup({
 	playground = {
 		enable = true,
 		disable = {},
-		updatetime = 25, -- Debounced time for highlighting nodes in the playground from source code
+		updatetime = 25,   -- Debounced time for highlighting nodes in the playground from source code
 		persist_queries = false, -- Whether the query persists across vim sessions
 		is_supported = function()
 			if vim.fn.strwidth(vim.fn.getline(".")) > 300 or vim.fn.getfsize(vim.fn.expand("%")) > 1024 * 1024 then
@@ -1109,7 +970,6 @@ require("nvim-treesitter.configs").setup({
 	highlight = {
 		-- `false` will disable the whole extension
 		enable = true,
-
 		-- NOTE: these are the names of the parsers and not the filetype. (for example if you want to
 		-- disable highlighting for the `tex` filetype, you need to include `latex` in this list as this is
 		-- the name of the parser)
@@ -1118,7 +978,7 @@ require("nvim-treesitter.configs").setup({
 		-- Using this option may slow down your editor, and you may see some duplicate highlights.
 		-- Instead of true it can also be a list of languages
 		additional_vim_regex_highlighting = false,
-		max_file_lines = 10000,
+		max_file_lines = 6000,
 		disable = function(_, bufnr)
 			return vim.api.nvim_buf_line_count(bufnr) > 10000
 		end,
@@ -1133,19 +993,20 @@ require("nvim-treesitter.configs").setup({
 	},
 })
 
-local null_ls = require("null-ls")
+-- local null_ls =
+require("null-ls").setup()
 
-null_ls.setup({
-	debug = false,
-	sources = {
-		null_ls.builtins.formatting.stylua,
-		-- null_ls.builtins.diagnostics.eslintd,
-		-- null_ls.builtins.completion.spell,
-		null_ls.builtins.formatting.shellharden,
-		null_ls.builtins.formatting.astyle,
-		null_ls.builtins.formatting.black,
-	},
-})
+-- null_ls.setup({
+-- 	debug = false,
+-- 	sources = {
+-- 		null_ls.builtins.formatting.stylua,
+-- 		-- null_ls.builtins.diagnostics.eslintd,
+-- 		-- null_ls.builtins.completion.spell,
+-- 		null_ls.builtins.formatting.shellharden,
+-- 		null_ls.builtins.formatting.astyle,
+-- 		null_ls.builtins.formatting.black,
+-- 	},
+-- })
 
 require("notify").setup({
 	-- Animation style (see below for details)
@@ -1176,82 +1037,82 @@ require("notify").setup({
 require("telescope").load_extension("notify")
 vim.notify = require("notify")
 
+require("barbar").setup()
 -- Set barbar's options
-require("bufferline").setup({
-	-- Enable/disable animations
-	animation = true,
-	-- Enable/disable auto-hiding the tab bar when there is a single buffer
-	auto_hide = true,
-	-- Enable/disable current/total tabpages indicator (top right corner)
-	tabpages = true,
-	-- Enable/disable close button
-	closable = false,
-	-- Enables/disable clickable tabs
-	--  - left-click: go to buffer
-	--  - middle-click: delete buffer
-	clickable = true,
-	-- Enables / disables diagnostic symbols
-	diagnostics = {
-		-- you can use a list
-		{ enabled = false, icon = "ﬀ" }, -- ERROR
-		{ enabled = false }, -- WARN
-		{ enabled = false }, -- INFO
-		{ enabled = false }, -- HINT
+-- require("bufferline").setup({
+-- 	-- Enable/disable animations
+-- 	animation = true,
+-- 	-- Enable/disable auto-hiding the tab bar when there is a single buffer
+-- 	auto_hide = true,
+-- 	-- Enable/disable current/total tabpages indicator (top right corner)
+-- 	tabpages = true,
+-- 	-- Enable/disable close button
+-- 	closable = false,
+-- 	-- Enables/disable clickable tabs
+-- 	--  - left-click: go to buffer
+-- 	--  - middle-click: delete buffer
+-- 	clickable = true,
+-- 	-- Enables / disables diagnostic symbols
+-- 	diagnostics = {
+-- 		-- you can use a list
+-- 		{ enabled = false, icon = "ﬀ" }, -- ERROR
+-- 		{ enabled = false },       -- WARN
+-- 		{ enabled = false },       -- INFO
+-- 		{ enabled = false },       -- HINT
+-- 		-- OR `vim.diagnostic.severity`
+-- 		[vim.diagnostic.severity.ERROR] = { enabled = false, icon = "ﬀ" },
+-- 		[vim.diagnostic.severity.WARN] = { enabled = false },
+-- 		[vim.diagnostic.severity.INFO] = { enabled = false },
+-- 		[vim.diagnostic.severity.HINT] = { enabled = false },
+-- 	},
+-- 	-- Excludes buffers from the tabline
+-- 	exclude_ft = { "javascript" },
+-- 	exclude_name = { "package.json" },
+-- 	-- -- Hide inactive buffers and file extensions. Other options are `alternate`, `current`, and `visible`.
+-- 	-- hide = {extensions = true, inactive = true},
 
-		-- OR `vim.diagnostic.severity`
-		[vim.diagnostic.severity.ERROR] = { enabled = false, icon = "ﬀ" },
-		[vim.diagnostic.severity.WARN] = { enabled = false },
-		[vim.diagnostic.severity.INFO] = { enabled = false },
-		[vim.diagnostic.severity.HINT] = { enabled = false },
-	},
-	-- Excludes buffers from the tabline
-	exclude_ft = { "javascript" },
-	exclude_name = { "package.json" },
-	-- -- Hide inactive buffers and file extensions. Other options are `alternate`, `current`, and `visible`.
-	-- hide = {extensions = true, inactive = true},
-
-	-- Disable highlighting alternate buffers
-	highlight_alternate = false,
-	-- Enable highlighting visible buffers
-	highlight_visible = true,
-	-- Enable/disable icons
-	-- if set to 'numbers', will show buffer index in the tabline
-	-- if set to 'both', will show buffer index and icons in the tabline
-	icons = true,
-	-- If set, the icon color will follow its corresponding buffer
-	-- highlight group. By default, the Buffer*Icon group is linked to the
-	-- Buffer* group (see Highlighting below). Otherwise, it will take its
-	-- default value as defined by devicons.
-	icon_custom_colors = false,
-	-- Configure icons on the bufferline.
-	icon_separator_active = "▎",
-	icon_separator_inactive = "",
-	icon_close_tab = "",
-	icon_close_tab_modified = "●",
-	icon_pinned = "車",
-	-- If true, new buffers will be inserted at the start/end of the list.
-	-- Default is to insert after current buffer.
-	insert_at_end = false,
-	insert_at_start = false,
-	-- Sets the maximum padding width with which to surround each tab
-	maximum_padding = 1,
-	-- Sets the minimum padding width with which to surround each tab
-	minimum_padding = 1,
-	-- Sets the maximum buffer name length.
-	maximum_length = 30,
-	-- If set, the letters for each buffer in buffer-pick mode will be
-	-- assigned based on their name. Otherwise or in case all letters are
-	-- already assigned, the behavior is to assign letters in order of
-	-- usability (see order below)
-	semantic_letters = true,
-	-- New buffer letters are assigned in this order. This order is
-	-- optimal for the qwerty keyboard layout but might need adjustement
-	-- for other layouts.
-	letters = "asdfjkl;ghnmxcvbziowerutyqpASDFJKLGHNMXCVBZIOWERUTYQP",
-	-- Sets the name of unnamed buffers. By default format is "[Buffer X]"
-	-- where X is the buffer number. But only a static string is accepted here.
-	no_name_title = nil,
-})
+-- 	-- Disable highlighting alternate buffers
+-- 	highlight_alternate = false,
+-- 	-- Enable highlighting visible buffers
+-- 	highlight_visible = true,
+-- 	-- Enable/disable icons
+-- 	-- if set to 'numbers', will show buffer index in the tabline
+-- 	-- if set to 'both', will show buffer index and icons in the tabline
+-- 	icons = true,
+-- 	-- If set, the icon color will follow its corresponding buffer
+-- 	-- highlight group. By default, the Buffer*Icon group is linked to the
+-- 	-- Buffer* group (see Highlighting below). Otherwise, it will take its
+-- 	-- default value as defined by devicons.
+-- 	icon_custom_colors = false,
+-- 	-- Configure icons on the bufferline.
+-- 	icon_separator_active = "▎",
+-- 	icon_separator_inactive = "",
+-- 	icon_close_tab = "",
+-- 	icon_close_tab_modified = "●",
+-- 	icon_pinned = "車",
+-- 	-- If true, new buffers will be inserted at the start/end of the list.
+-- 	-- Default is to insert after current buffer.
+-- 	insert_at_end = false,
+-- 	insert_at_start = false,
+-- 	-- Sets the maximum padding width with which to surround each tab
+-- 	maximum_padding = 1,
+-- 	-- Sets the minimum padding width with which to surround each tab
+-- 	minimum_padding = 1,
+-- 	-- Sets the maximum buffer name length.
+-- 	maximum_length = 30,
+-- 	-- If set, the letters for each buffer in buffer-pick mode will be
+-- 	-- assigned based on their name. Otherwise or in case all letters are
+-- 	-- already assigned, the behavior is to assign letters in order of
+-- 	-- usability (see order below)
+-- 	semantic_letters = true,
+-- 	-- New buffer letters are assigned in this order. This order is
+-- 	-- optimal for the qwerty keyboard layout but might need adjustement
+-- 	-- for other layouts.
+-- 	letters = "asdfjkl;ghnmxcvbziowerutyqpASDFJKLGHNMXCVBZIOWERUTYQP",
+-- 	-- Sets the name of unnamed buffers. By default format is "[Buffer X]"
+-- 	-- where X is the buffer number. But only a static string is accepted here.
+-- 	no_name_title = nil,
+-- })
 
 require("indent_blankline").setup({
 	-- for example, context is off by default, use this to turn it on
@@ -1269,3 +1130,181 @@ require("colorizer").setup({
 -- -- vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
 --
 require("vgit").setup()
+
+local crates = require("crates")
+crates.setup()
+
+local bufopts = { noremap = true, silent = true, buffer = bufnr }
+
+vim.api.nvim_create_autocmd("FileType", {
+	desc = "Attach keymappings",
+	group = vim.api.nvim_create_augroup("toml", { clear = false }),
+	pattern = "toml",
+	callback = function()
+		vim.keymap.set("n", "<leader>ct", crates.toggle, bufopts)
+		vim.keymap.set("n", "<leader>cr", crates.reload, bufopts)
+		-- vim.keymap.set("n", "K", show_documentation, { noremap = true, silent = true })
+		vim.keymap.set("n", "<leader>cc", crates.show_popup, bufopts)
+		vim.keymap.set("n", "<leader>cv", crates.show_versions_popup, bufopts)
+		vim.keymap.set("n", "<leader>cf", crates.show_features_popup, bufopts)
+		vim.keymap.set("n", "<leader>cd", crates.show_dependencies_popup, bufopts)
+
+		vim.keymap.set("n", "<leader>cu", crates.update_crate, bufopts)
+		vim.keymap.set("v", "<leader>cu", crates.update_crates, bufopts)
+		vim.keymap.set("n", "<leader>ca", crates.update_all_crates, bufopts)
+		vim.keymap.set("n", "<leader>cU", crates.upgrade_crate, bufopts)
+		vim.keymap.set("v", "<leader>cU", crates.upgrade_crates, bufopts)
+		vim.keymap.set("n", "<leader>cA", crates.upgrade_all_crates, bufopts)
+
+		vim.keymap.set("n", "<leader>cH", crates.open_homepage, bufopts)
+		vim.keymap.set("n", "<leader>cR", crates.open_repository, bufopts)
+		vim.keymap.set("n", "<leader>cD", crates.open_documentation, bufopts)
+		vim.keymap.set("n", "<leader>cC", crates.open_crates_io, bufopts)
+	end,
+})
+-- local function show_documentation()
+-- 	local filetype = vim.bo.filetype
+-- 	if vim.tbl_contains({ "vim", "help" }, filetype) then
+-- 		vim.cmd("h " .. vim.fn.expand("<cword>"))
+-- 	elseif vim.tbl_contains({ "man" }, filetype) then
+-- 		vim.cmd("Man " .. vim.fn.expand("<cword>"))
+-- 	elseif vim.fn.expand("%:t") == "Cargo.toml" and require("crates").popup_available() then
+-- 		require("crates").show_popup()
+-- 	else
+-- 		vim.lsp.buf.hover()
+-- 	end
+-- en
+
+local rust_opts = {
+	tools = {
+		-- rust-tools options
+		-- Automatically set inlay hints (type hints)
+		autoSetHints = true,
+		executor = require("rust-tools.executors").termopen,
+		-- Whether to show hover actions inside the hover window
+		-- This overrides the default hover handler
+		-- hover_with_actions = true,
+		runnables = {
+			-- whether to use telescope for selection menu or not
+			use_telescope = true,
+			-- rest of the opts are forwarded to telescope
+		},
+		debuggables = {
+			-- whether to use telescope for selection menu or not
+			use_telescope = true,
+			-- rest of the opts are forwarded to telescope
+		},
+		-- These apply to the default RustSetInlayHints command
+		inlay_hints = {
+			auto = true,
+			-- Only show inlay hints for the current line
+			only_current_line = false,
+			-- Event which triggers a refersh of the inlay hints.
+			-- You can make this "CursorMoved" or "CursorMoved,CursorMovedI" but
+			-- not that this may cause  higher CPU usage.
+			-- This option is only respected when only_current_line and
+			-- autoSetHints both are true.
+			only_current_line_autocmd = "CursorHold",
+			-- wheter to show parameter hints with the inlay hints or not
+			show_parameter_hints = true,
+			-- prefix for parameter hints
+			parameter_hints_prefix = "<- ",
+			-- prefix for all the other hints (type, chaining)
+			other_hints_prefix = "=> ",
+			-- whether to align to the length of the longest line in the file
+			max_len_align = false,
+			-- padding from the left if max_len_align is true
+			max_len_align_padding = 1,
+			-- whether to align to the extreme right or not
+			right_align = false,
+			-- padding from the right if right_align is true
+			right_align_padding = 7,
+			-- The color of the hints
+			highlight = "Comment",
+		},
+		hover_actions = {
+			-- the border that is used for the hover window
+			-- see vim.api.nvim_open_win()
+			border = {
+				{ "╭", "FloatBorder" },
+				{ "─", "FloatBorder" },
+				{ "╮", "FloatBorder" },
+				{ "│", "FloatBorder" },
+				{ "╯", "FloatBorder" },
+				{ "─", "FloatBorder" },
+				{ "╰", "FloatBorder" },
+				{ "│", "FloatBorder" },
+			},
+			-- whether the hover action window gets automatically focused
+			auto_focus = false,
+		},
+		-- settings for showing the crate graph based on graphviz and the dot
+		-- command
+		crate_graph = {
+			-- Backend used for displaying the graph
+			-- see: https://graphviz.org/docs/outputs/
+			-- default: x11
+			backend = "x11",
+			-- where to store the output, nil for no output stored (relative
+			-- path from pwd)
+			-- default: nil
+			output = nil,
+			-- true for all crates.io and external crates, false only the local
+			-- crates
+			-- default: true
+			full = true,
+		},
+	},
+	-- all the opts to send to nvim-lspconfig
+	-- these override the defaults set by rust-tools.nvim
+	-- see https://github.com/neovim/nvim-lspconfig/blob/master/CONFIG.md#rust_analyzer
+	server = {
+		on_attach = on_attach,
+		capabilities = require("cmp_nvim_lsp").default_capabilities(),
+		-- standalone = true,
+		settings = {
+			["rust-analyzer"] = {
+				-- enable clippy on save
+				checkOnSave = {
+					command = "clippy",
+					extraArgs = { "--all", "--", "-W", "clippy::all" },
+				},
+				-- rustfmt = {
+				-- 	extraArgs = { "+nightly" },
+				-- },
+				-- cargo = {
+				-- 	loadOutDirsFromCheck = true,
+				-- },
+				procMacro = {
+					enable = true,
+				},
+			},
+		},
+		-- vim.keymap.set("n", "<C-g>", rt.hover_actions.hover_actions, bufopts)
+		-- -- Code action groups
+		-- vim.keymap.set("n", "<Leader>a", rt.code_action_group.code_action_group, bufopts)
+		-- -- Hover actions
+		-- end,
+	},
+	dap = {
+		adapter = {
+			type = "executable",
+			command = "lldb-vscode",
+			name = "rt_lldb",
+		},
+	},
+}
+
+require("rust-tools").setup(rust_opts)
+
+require("netrw").setup({
+	-- Put your configuration here, or leave the object empty to take the default
+	-- configuration.
+	icons = {
+		symlink = "", -- Symlink icon (directory and file)
+		directory = "", -- Directory icon
+		file = "", -- File icon
+	},
+	use_devicons = true, -- Uses nvim-web-devicons if true, otherwise use the file icon specified above
+	mappings = {},    -- Custom key mappings
+})
