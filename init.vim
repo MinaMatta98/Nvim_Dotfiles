@@ -55,7 +55,7 @@ nnoremap <silent><c-q> :FloatermNew --cwd=<buffer> --wintype=split --position=ri
 inoremap <silent><c-q> <Esc> :FloatermToggle<CR>
 tnoremap <c-q> <c-\><c-n> :FloatermToggle<CR>
 nnoremap <leader>P :lua vim.lsp.buf.format()<CR>
-nnoremap <leader>F :LfCurrentDirectoryNewTab<CR>
+nnoremap <leader>F :Lf<CR>
 nnoremap <leader>ff :lua require('telescope.builtin').find_files( { cwd = vim.fn.expand('%:p:h') })<CR>
 nnoremap <silent>  <c-s-l> <Cmd>BufferNext<CR>
 nnoremap <silent>  <c-s-h> <Cmd>BufferPrevious<CR>
