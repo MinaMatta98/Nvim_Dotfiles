@@ -500,10 +500,12 @@ require("mason-lspconfig").setup({
 		"pyright",
 		"clangd",
 		"lua_ls",
-		"rome",
+		-- "rome",
 		"bashls",
 		"yamlls",
 		"html",
+		"tsserver",
+		"tailwindcss",
 		"vimls",
 		"rust_analyzer",
 	},
@@ -515,7 +517,7 @@ require("mason-lspconfig").setup({
 
 require("mason-nvim-dap").setup({
 	automatic_setup = true,
-	ensure_installed = { "stylua", "jq", "debugpy", "clangd", "codelldb" },
+	ensure_installed = { "stylua", "jq", "debugpy", "clangd", "codelldb"},
 })
 
 local dap = require("dap")
@@ -843,7 +845,7 @@ require("nvim-navic").setup({
 })
 
 local list =
-{ "vimls", "yamlls", "rome", "bashls", "texlab", "lua_ls", "cssmodules_ls", "pyright", "emmet_ls", "lemminx" }
+{ "vimls", "yamlls", "bashls", "texlab", "lua_ls", "cssmodules_ls", "pyright", "emmet_ls", "lemminx", "tailwindcss" }
 
 for _, server_name in ipairs(list) do
 	require("lspconfig")[server_name].setup({
