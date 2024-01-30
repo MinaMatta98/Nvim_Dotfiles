@@ -66,8 +66,8 @@ nnoremap <leader>b :Telescope buffers<CR>
 nnoremap <leader>\ :! gcc % -Ofast -o %:t:r -ggdb<CR>
 nnoremap <silent> <leader>t :TestNearest<CR>
 nnoremap <silent> <leader>T :TestFile<CR>
-nnoremap <leader>q :BufferClose<CR>
-nnoremap <leader>Q :BufferClose!<CR>
+nnoremap <leader>q :BufferDelete<CR>
+nnoremap <leader>Q :BufferDelete!<CR>
 nnoremap <c-d> :lua require('neogen').generate()<CR>
 nnoremap <leader>R :so /home/mina/.vim/valgrind.vim<CR>
 inoremap <expr> <c-x><c-f> fzf#vim#complete#path(
@@ -99,7 +99,7 @@ Plug 'hrsh7th/cmp-cmdline'
 Plug 'hrsh7th/cmp-vsnip'
 Plug 'hrsh7th/nvim-cmp'
 Plug 'L3MON4D3/LuaSnip'
-Plug 'prichrd/netrw.nvim'
+" Plug 'prichrd/netrw.nvim'
 Plug 'saadparwaiz1/cmp_luasnip'
 " Plug 'ms-jpq/coq.artifacts', {'branch': 'artifacts'}
 " Plug 'ms-jpq/coq_nvim', {'branch': 'coq'}
@@ -113,6 +113,7 @@ Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-fugitive'
 Plug 'startup-nvim/startup.nvim'
 Plug 'nvim-lualine/lualine.nvim'
+Plug 'tpope/vim-surround'
 " Plug 'vim-airline/vim-airline'
 " Plug 'vim-airline/vim-airline-themes'
 " Plug 'gfanto/fzf-lsp.nvim'
@@ -143,7 +144,7 @@ Plug 'lewis6991/impatient.nvim'
 Plug 'nvim-tree/nvim-tree.lua'
 Plug 'LunarVim/onedarker.nvim'
 Plug 'lunarvim/horizon.nvim'
-Plug 'lunarvim/synthwave84.nvim'
+Plug 'lunarvim/synthwav84.nvim'
 Plug 'folke/tokyonight.nvim', { 'branch': 'main' }
 Plug 'williamboman/mason.nvim'
 Plug 'williamboman/mason-lspconfig.nvim'
@@ -152,6 +153,11 @@ Plug 'jayp0521/mason-null-ls.nvim'
 Plug 'danymat/neogen'
 Plug 'SmiteshP/nvim-navic'
 Plug 'dccsillag/magma-nvim', { 'do': ':UpdateRemotePlugins', 'commit': '0fcd00cdbe167b1a5e3315ff737f6f01fc99d491' }
+" Plug 'WhiteBlackGoose/magma-nvim-goose', { 'do': ':UpdateRemotePlugins' }
+" Plug 'meatballs/notebook.nvim'
+" Plug 'benlubas/molten-nvim'
+Plug '3rd/image.nvim'
+Plug 'lewis6991/gitsigns.nvim' " OPTIONAL: for git status
 Plug 'norcalli/nvim-colorizer.lua'
 Plug 'andymass/vim-matchup'
 Plug 'ray-x/lsp_signature.nvim'
@@ -165,15 +171,13 @@ Plug 'mattn/webapi-vim'
 Plug 'sharkdp/fd'
 Plug 'BurntSushi/ripgrep'
 Plug 'saecki/crates.nvim', { 'tag': 'v0.3.0' }
+Plug 'kaarmu/typst.vim'
+Plug 'ggandor/leap.nvim'
+" Plug 'vim-pandoc/vim-pandoc'
+" Plug 'vim-pandoc/vim-pandoc-syntax'
+" Plug 'jmbuhr/otter.nvim'
+" Plug 'quarto-dev/quarto-nvim'
 call plug#end()
-
-" let g:onedark_config = {
-"     \ 'style': 'dark',
-" 	\ 'diagnostics': {
-" 	\ 'undercurl': 'false'}
-" 	\}
-" colorscheme onedarker
-" set background=dark
 
 if (has("termguicolors"))
 set termguicolors
@@ -209,13 +213,25 @@ noremap <silent> <c-j> :<C-U>TmuxNavigateDown<cr>
 noremap <silent> <c-k> :<C-U>TmuxNavigateUp<cr>
 noremap <silent> <c-l> :<C-U>TmuxNavigateRight<cr>
 
+
+
+let g:tex_flavor='latex'
+let g:vimtex_view_method = 'zathura'
+let g:livepreview_previewer = 'alacritty -e zathura'
+let g:vimtex_compiler_method = 'latexmk'
+let maplocalleader = " "
+
+let g:magma_automatically_open_output = v:false
+let g:magma_image_provider = "ueberzug"
+autocmd BufEnter <buffer> execute 'cd' '%:p:h'
+autocmd BufNewFile,BufRead,BufEnter *.typst   set filetype=typst
+autocmd FileType * highlight rainbowcol1 guifg=#61AFEF gui=bold
+
 " let g:floaterm_height = 0.85
 let g:floaterm_opener = 'vsplit'
 " let g:floaterm_autohide = 1
-lua require('init')
 set encoding=UTF-8
 " hi CurrentWord guibg=#31313a
-hi BufferTabpageFill guibg='#222436'
 " highlight IndentBlanklineContextChar guifg=gray gui=nocombine
 " gray
 highlight! CmpItemAbbrDeprecated guibg=NONE gui=strikethrough guifg=#808080
@@ -229,15 +245,15 @@ highlight! link CmpItemKindText CmpItemKindVariable
 " pink
 highlight! CmpItemKindFunction guibg=NONE guifg=#C586C0
 highlight! link CmpItemKindMethod CmpItemKindFunction
+
 " front
 highlight! CmpItemKindKeyword guibg=NONE guifg=#D4D4D4
 highlight! link CmpItemKindProperty CmpItemKindKeyword
 highlight! link CmpItemKindUnit CmpItemKindKeyword
+lua require('init')
 
-let g:tex_flavor='latex'
-let g:vimtex_view_method = 'zathura'
-let g:livepreview_previewer = 'alacritty -e zathura'
-let g:vimtex_compiler_method = 'latexmk'
-let maplocalleader = " "
-
-let g:magma_automatically_open_output = v:false
+highlight! BufferCurrentSign guibg=None guifg=#6666ea
+highlight! TabpageFill guibg='#24283b'
+highlight! StatusLine guibg='#24283b'
+highlight! TabLineFill guibg='#24283b'
+highlight! TabLineSel guibg='#24283b'
