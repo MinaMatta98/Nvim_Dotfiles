@@ -56,26 +56,73 @@ cmp.setup({
 		["<C-Enter>"] = cmp.mapping.complete(),
 		["<C-e>"] = cmp.mapping.abort(),
 		["<CR>"] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
-		["<Tab>"] = cmp.mapping(cmp.mapping.select_next_item(), { "i", "s" }),
-		["<S-Tab>"] = cmp.mapping(cmp.mapping.select_prev_item(), { "i", "s" }),
+		["<Tab>"] = cmp.mapping(function(fallback)
+			if cmp.visible() then
+				cmp.select_next_item()
+				-- You could replace the expand_or_jumpable() calls with expand_or_locally_jumpable()
+				-- that way you will only jump inside the snippet region
+			elseif luasnip.expand_or_jumpable() then
+				luasnip.expand_or_jump()
+			elseif has_words_before() then
+				cmp.complete()
+			else
+				fallback()
+			end
+		end, { "i", "s" }),
+
+		["<S-Tab>"] = cmp.mapping(function(fallback)
+			if cmp.visible() then
+				cmp.select_prev_item()
+			elseif luasnip.jumpable(-1) then
+				luasnip.jump(-1)
+			else
+				fallback()
+			end
+		end, { "i", "s" }),
 	}),
 	sources = cmp.config.sources({
 		{ name = "nvim_lsp_signature_help" },
+		{ name = "nvim_lsp_code_action" },
+		-- { name = 'nvim_lsp_document_symbol' },
 		{ name = "nvim_lsp" },
+		{ name = 'cmp_buffer' },
 		{ name = "path" },
 		{ name = "crates" },
+		{ name = 'otter' },
+		{
+			name = "nuget",
+			keyword_length = 0,
+		},
 		-- { name = 'vsnip' }, -- For vsnip users.
-		{ name = "luasnip" }, -- For luasnip users.
+		{ name = 'luasnip' },
+		-- { name = "luasnip" }, -- For luasnip users.
 		-- { name = 'ultisnips' }, -- For ultisnips users.
 		-- { name = 'snippy' }, -- For snippy users.
 	}, {
 		{ name = "buffer" },
 	}),
+	-- formatting = {
+	-- 	fields = { "kind", "abbr", "menu" },
+	-- 	format = function(entry, vim_item)
+	-- 		-- Kind icons
+	-- 		vim_item.kind = string.format("%s %s", kind_icons[vim_item.kind], vim_item.kind) -- This concatonates the icons with the name of the item kind
+	-- 		-- Source
+	-- 		vim_item.menu = ({
+	-- 			buffer = "[Buffer]",
+	-- 			nvim_lsp = "[LSP]",
+	-- 			luasnip = "[LuaSnip]",
+	-- 			nvim_lua = "[Lua]",
+	-- 			latex_symbols = "[LaTeX]",
+	-- 		})[entry.source.name]
+	-- 		return vim_item
+	-- 	end,
+	-- },
+
 	formatting = {
 		fields = { "kind", "abbr", "menu" },
 		format = function(entry, vim_item)
 			-- Kind icons
-			vim_item.kind = string.format("%s %s", kind_icons[vim_item.kind], vim_item.kind) -- This concatonates the icons with the name of the item kind
+			vim_item.kind = string.format("%s %s", kind_icons[vim_item.kind], vim_item.kind)
 			-- Source
 			vim_item.menu = ({
 				buffer = "[Buffer]",
@@ -83,7 +130,10 @@ cmp.setup({
 				luasnip = "[LuaSnip]",
 				nvim_lua = "[Lua]",
 				latex_symbols = "[LaTeX]",
+				nuget = "[NuGet]",
+				-- code_action = "[LSP Code Action]"
 			})[entry.source.name]
+			-- Check if the source is nvim_lsp and set menu accordingly
 			return vim_item
 		end,
 	},
@@ -98,8 +148,21 @@ cmp.setup.filetype("gitcommit", {
 	}),
 })
 
+require("cmp").setup.filetype({ "dap-repl", "dapui_watches", "dapui_hover" }, {
+	sources = {
+		{ name = "dap" },
+	},
+})
+
+require("cmp").setup({
+	enabled = function()
+		return vim.api.nvim_buf_get_option(0, "buftype") ~= "prompt"
+			or require("cmp_dap").is_dap_buffer()
+	end
+})
+
 -- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
-cmp.setup.cmdline({ "/", "?" }, {
+cmp.setup.cmdline({ '/', '?' }, {
 	mapping = cmp.mapping.preset.cmdline(),
 	sources = {
 		{ name = "buffer" },

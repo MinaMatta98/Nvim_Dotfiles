@@ -22,7 +22,7 @@ set fileencoding=utf-8
 set filetype
 let skip_defaults_vim=1
 set clipboard+=unnamedplus
-set cmdheight=0
+set cmdheight=1
 " Enable autocompletion:
 set wildmode=longest,list,full 
 set completeopt=menuone,noinsert,noselect
@@ -55,8 +55,10 @@ nnoremap <silent><c-q> :FloatermNew --cwd=<buffer> --wintype=split --position=ri
 inoremap <silent><c-q> <Esc> :FloatermToggle<CR>
 tnoremap <c-q> <c-\><c-n> :FloatermToggle<CR>
 nnoremap <leader>P :lua vim.lsp.buf.format()<CR>
-nnoremap <leader>F :Lf<CR>
+" nnoremap <leader>F :Lf<CR>
+nnoremap <leader>F :Yazi<CR>
 nnoremap <leader>ff :lua require('telescope.builtin').find_files( { cwd = vim.fn.expand('%:p:h') })<CR>
+nnoremap <silent>  <c-s-l> <Cmd>BufferNext<CR>
 nnoremap <silent>  <c-s-l> <Cmd>BufferNext<CR>
 nnoremap <silent>  <c-s-h> <Cmd>BufferPrevious<CR>
 " nnoremap <leader><space> :Telescope resume<CR>
@@ -64,8 +66,8 @@ nnoremap <leader>of :Telescope oldfiles<CR>
 nnoremap <leader>s :Telescope live_grep<CR>
 nnoremap <leader>b :Telescope buffers<CR>
 nnoremap <leader>\ :! gcc % -Ofast -o %:t:r -ggdb<CR>
-nnoremap <silent> <leader>t :TestNearest<CR>
-nnoremap <silent> <leader>T :TestFile<CR>
+" nnoremap <silent> <leader>tt :Neo<CR>
+" nnoremap <silent> <leader>T :TestFile<CR>
 nnoremap <leader>q :BufferDelete<CR>
 nnoremap <leader>Q :BufferDelete!<CR>
 nnoremap <c-d> :lua require('neogen').generate()<CR>
@@ -175,8 +177,19 @@ Plug 'kaarmu/typst.vim'
 Plug 'ggandor/leap.nvim'
 " Plug 'vim-pandoc/vim-pandoc'
 " Plug 'vim-pandoc/vim-pandoc-syntax'
-" Plug 'jmbuhr/otter.nvim'
-" Plug 'quarto-dev/quarto-nvim'
+Plug 'quarto-dev/quarto-nvim'
+Plug 'jmbuhr/otter.nvim'
+Plug 'aznhe21/actions-preview.nvim',
+Plug 'anuvyklack/pretty-fold.nvim',
+Plug 'NicholasMata/nvim-dap-cs'
+Plug 'Decodetalkers/csharpls-extended-lsp.nvim'
+Plug 'tpope/vim-dadbod'
+Plug 'kristijanhusak/vim-dadbod-completion'
+Plug 'kristijanhusak/vim-dadbod-ui'
+Plug 'tpope/vim-dotenv'
+Plug 'rouge8/neotest-rust'
+" This is required by vim-nuget
+" Plug 'PasiBergman/cmp-nuget'
 call plug#end()
 
 if (has("termguicolors"))
