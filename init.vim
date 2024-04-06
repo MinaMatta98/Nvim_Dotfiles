@@ -4,8 +4,7 @@
 " you can find below.  If you wish to change any of those settings, you should
 " do it in this file (/etc/vimrc), since archlinux.vim will be overwritten
 " everytime an upgrade of the vim packages is performed.  It is recommended to
-" make changes after sourcing archlinux.vim since it alters the value of the
-" 'compatible' option.
+" make changes after sourcing archlinux.vim since it alters the value of the 'compatible' option.
 
 " This line should not be removed as it ensures that various options arezsh
 " properly set to work with the Vim-related packages.
@@ -90,7 +89,7 @@ Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install' }
 " Plug 'junegunn/fzf', {'dir': '~/.fzf', 'do': './install --all' }
 " Plug 'junegunn/fzf.vim'
 Plug 'Pocco81/dap-buddy.nvim'
-Plug 'ptzz/lf.vim'
+" Plug 'ptzz/lf.vim'
 Plug 'voldikss/vim-floaterm'
 " Plug 'lvimuser/lsp-inlayhints.nvim'
 Plug 'neovim/nvim-lspconfig'
@@ -125,6 +124,10 @@ Plug 'nvim-telescope/telescope.nvim'
 Plug 'nvim-treesitter/nvim-treesitter' , {'do': ':TSUpdate'}
 Plug 'p00f/nvim-ts-rainbow'
 Plug 'theHamsta/nvim-dap-virtual-text'
+Plug 'nvim-neotest/nvim-nio'
+Plug 'nvim-neotest/neotest'
+Plug 'nvim-neotest/neotest-plenary'
+Plug 'https://github.com/Issafalcon/neotest-dotnet'
 Plug 'rcarriga/nvim-dap-ui'
 Plug 'mfussenegger/nvim-dap-python'
 Plug 'nvim-tree/nvim-web-devicons'
@@ -239,6 +242,8 @@ let g:magma_image_provider = "ueberzug"
 autocmd BufEnter <buffer> execute 'cd' '%:p:h'
 autocmd BufNewFile,BufRead,BufEnter *.typst   set filetype=typst
 autocmd FileType * highlight rainbowcol1 guifg=#61AFEF gui=bold
+autocmd BufNewFile,BufRead *.cshtml set filetype=html.cshtml.razor
+autocmd BufNewFile,BufRead *.razor set filetype=html.cshtml.razor
 
 " let g:floaterm_height = 0.85
 let g:floaterm_opener = 'vsplit'

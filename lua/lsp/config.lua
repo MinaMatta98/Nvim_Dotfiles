@@ -1,4 +1,8 @@
 local global_on_attach = function(client, bufnr)
+	-- vim.lsp.set_log_level("debug")
+
+
+	require('git-conflict').setup()
 	vim.opt.pumblend = 0
 
 	if client.name == "rust_analyzer" then
@@ -13,8 +17,11 @@ local global_on_attach = function(client, bufnr)
 	end
 
 	if client.name == "texlab" then
-		require("luasnip.loaders.from_vscode").lazy_load()
 		require("luasnip-latex-snippets").setup({})
+	end
+
+	if client.name == "csharp_ls" or client.name == "jedi_language_server" then
+		vim.keymap.set({ "v", "n" }, "<leader>A", require("actions-preview").code_actions)
 	end
 
 	require("nvim-autopairs").setup({})
@@ -36,7 +43,10 @@ local global_on_attach = function(client, bufnr)
 		-- e.g. 80 to position at column 80, see `:h nvim_buf_set_extmark()`
 	})
 
-	require("dapui").setup({
+
+	local dap = require("dap")
+	local dapui = require("dapui")
+	dapui.setup({
 		icons = { expanded = "", collapsed = "", current_frame = "" },
 		mappings = {
 			-- Use a table to apply multiple mappings
@@ -89,7 +99,7 @@ local global_on_attach = function(client, bufnr)
 		controls = {
 			-- Requires Neovim nightly (or 0.8 when released)
 			enabled = true,
-			-- Display controls in this element
+			-- Display controls in this elementinit
 			element = "repl",
 			icons = {
 				pause = "",
@@ -117,12 +127,22 @@ local global_on_attach = function(client, bufnr)
 		},
 	})
 
-	local dap = require("dap")
-	local dapui = require("dapui")
+
 
 	dap.listeners.after.event_initialized["dapui_config"] = function()
+		-- require('dap').defaults.fallback.exception_breakpoints = {'raised'}
+		require('dap').set_exception_breakpoints({ 'all' })
 		dapui.open({ reset = true })
 	end
+
+
+	dap.adapters.coreclr = {
+		type = 'executable',
+		command = '/home/mina/nvim/mason/bin/netcoredbg',
+		args = { '--interpreter=vscode' }
+	}
+
+	dap.configurations.cs = require("lsp.dotnet")
 
 	require("neogen").setup({
 		snippet_engine = "luasnip",
@@ -135,6 +155,16 @@ local global_on_attach = function(client, bufnr)
 					annotation_convention = "ldoc", -- for a full list of annotation_conventions, see supported-languages below,
 				},
 			},
+			cs = {
+				template = {
+					annotation_convention = "xmldoc", -- for a full list of annotation_conventions, see supported-languages below,
+				},
+			},
+			-- ['cs.xmldoc'] = require('neogen.configurations.cs'),
+			-- ['cpp.doxygen'] = require('neogen.configurations.cpp'),
+			-- ['python.numpydoc'] = require('neogen.configurations.python'),
+			-- ['rust.rustdoc'] = require('neogen.configurations.rust'),
+			-- ['javascript.jsdoc'] = require('neogen.configurations.jsdoc')
 		},
 	})
 
@@ -163,12 +193,21 @@ local global_on_attach = function(client, bufnr)
 	vim.keymap.set("n", "<leader>r", "<cmd>lua vim.lsp.buf.rename()<CR>", bufopts)
 	vim.keymap.set("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", bufopts)
 	vim.keymap.set("n", "<F2>", "<cmd>lua require'dap'.step_over()<CR>", bufopts)
+	vim.keymap.set("n", "<leader>dc", "<cmd>lua require'dap'.continue()<CR>", bufopts)
 	vim.keymap.set("n", "<F1>", "<cmd>lua require'dap'.step_into()<CR>", bufopts)
 	vim.keymap.set("n", "<F3>", "<cmd>lua require'dap'.step_out()<CR>", bufopts)
+	vim.keymap.set("n", "<leader>de", "<cmd>lua require('dapui').eval()<CR>", bufopts)
 	vim.keymap.set("n", "<space>dl", "<cmd>lua require'dapui'.open()<CR>", bufopts)
 	vim.keymap.set("n", "<leader>C", "<cmd>lua require'dap'.toggle_breakpoint()<CR>", bufopts)
 	vim.keymap.set("n", "<leader>tws", "<cmd>lua require('telescope.builtin').lsp_workspace_symbols()<CR>", bufopts)
 	vim.keymap.set("n", "<leader>ts", "<cmd>lua require('telescope.builtin').lsp_document_symbols()<CR>", bufopts)
+	vim.keymap.set("n", "<leader>tr", "<cmd>lua require('neotest').run.run()<CR>", bufopts)
+	vim.keymap.set("n", "<leader>tt", "<cmd>lua require('neotest').run.run(vim.fn.expand('%'))<CR>", bufopts)
+	vim.keymap.set("n", "<leader>to", "<cmd>lua require('neotest').output.open()<CR>", bufopts)
+	vim.keymap.set("n", "<leader>tS", "<cmd>lua require('neotest').summary.toggle()<CR>", bufopts)
+	vim.keymap.set("n", "<leader>tn", "<cmd>lua require('neotest').jump.next({status = 'failed'})<CR>", bufopts)
+	vim.keymap.set("n", "<leader>tN", "<cmd>lua require('neotest').jump.prev({status = 'failed'})<CR>", bufopts)
+	vim.keymap.set("n", "<leader>td", "<cmd>lua require('neotest').run.run({strategy = 'dap'})<CR>", bufopts)
 
 	local openUrl = function()
 		local url = string.match(vim.fn.getline("."), "[a-z]*://[^ >,;():]*")
@@ -186,12 +225,20 @@ local global_on_attach = function(client, bufnr)
 		"<cmd>lua require'dap'.set_breakpoint(vim.fn.input('Breakpoint Condition: '))<CR>",
 		bufopts
 	)
-	vim.keymap.set("x", "<leader>ja", "<cmd>MagmaEvaluateVisual<CR>", bufopts)
-	vim.keymap.set("n", "<leader>ji", "<cmd>MagmaInit<CR>", bufopts)
-	vim.keymap.set("n", "<leader>jj", "<cmd>MagmaEvaluateLine<CR>", bufopts)
-	vim.keymap.set("n", "<leader>jr", "<cmd>MagmaReevaluateCell<CR>", bufopts)
-	vim.keymap.set("n", "<leader>js", "<cmd>MagmaShowOutput<CR>", bufopts)
-	vim.keymap.set("n", "<leader>jd", "<cmd>MagmaDelete<CR>", bufopts)
+	-- vim.keymap.set("x", "<leader>ja", "<cmd>MagmaEvaluateVisual<CR>", bufopts)
+	-- vim.keymap.set("n", "<leader>ji", "<cmd>MagmaInit<CR>", bufopts)
+	-- vim.keymap.set("n", "<leader>jj", "<cmd>MagmaEvaluateLine<CR>", bufopts)
+	-- vim.keymap.set("n", "<leader>jr", "<cmd>MagmaReevaluateCell<CR>", bufopts)
+	-- vim.keymap.set("n", "<leader>js", "<cmd>MagmaShowOutput<CR>", bufopts)
+	-- vim.keymap.set("n", "<leader>jd", "<cmd>MagmaDelete<CR>", bufopts)
+
+	vim.keymap.set("x", "<leader>ja", "<cmd>MoltenEvaluateVisual<CR>", bufopts)
+	vim.keymap.set("n", "<leader>ji", "<cmd>MoltenInit<CR>", bufopts)
+	vim.keymap.set("n", "<leader>jj", "<cmd>MoltenEvaluateLine<CR>", bufopts)
+	vim.keymap.set("n", "<leader>jr", "<cmd>MoltenReevaluateCell<CR>", bufopts)
+	vim.keymap.set("n", "<leader>js", "<cmd>MoltenShowOutput<CR>", bufopts)
+	vim.keymap.set("n", "<leader>jd", "<cmd>MoltenDelete<CR>", bufopts)
+
 	vim.keymap.set("v", "<leader>ds", "<ESC>:lua require('dap-python').debug_selection()<CR>", bufopts)
 
 	local signs = {
@@ -282,8 +329,10 @@ local flags = {
 }
 
 local list =
-{ "vimls", "yamlls", "bashls", "texlab", "lua_ls", "cssmodules_ls", "emmet_ls", "lemminx", "tailwindcss",
-	"jedi_language_server", "taplo" }
+{ "vimls", "yamlls", "bashls", "texlab", "lua_ls", "cssmodules_ls", "emmet_ls", "lemminx",
+	-- "tailwindcss",
+
+	"jedi_language_server", "taplo", "jsonls" }
 
 for _, server_name in ipairs(list) do
 	require("lspconfig")[server_name].setup({
@@ -297,10 +346,23 @@ end
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities.offsetEncoding = { "utf-16" }
 
+
+require("lspconfig").csharp_ls.setup({
+	flags = flags,
+	capabilities = require("cmp_nvim_lsp").default_capabilities(),
+	on_attach = global_on_attach,
+	handlers = {
+		["textDocument/definition"] = require('csharpls_extended').handler,
+		["textDocument/typeDefinition"] = require('csharpls_extended').handler,
+	},
+	enable_editorconfig_support = true,
+})
+
 require("lspconfig").clangd.setup({
 	require("cmp_nvim_lsp").default_capabilities(),
 	on_attach = global_on_attach,
 	capabilities = capabilities,
+
 })
 
 require 'lspconfig'.typst_lsp.setup {
