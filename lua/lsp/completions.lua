@@ -1,3 +1,12 @@
+local has_words_before = function()
+	unpack = unpack or table.unpack
+	local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+	return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
+end
+
+local luasnip = require("luasnip")
+require("luasnip.loaders.from_vscode").lazy_load()
+
 local kind_icons = {
 	Text = "",
 	Method = "",
@@ -165,17 +174,17 @@ require("cmp").setup({
 cmp.setup.cmdline({ '/', '?' }, {
 	mapping = cmp.mapping.preset.cmdline(),
 	sources = {
-		{ name = "buffer" },
-	},
+		{ name = 'buffer' }
+	}
 })
 
 -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
-cmp.setup.cmdline(":", {
+cmp.setup.cmdline(':', {
 	mapping = cmp.mapping.preset.cmdline(),
 	sources = cmp.config.sources({
-		{ name = "path" },
+		{ name = 'path' }
 	}, {
-		{ name = "cmdline" },
+		{ name = 'cmdline' }
 	}),
+	matching = { disallow_symbol_nonprefix_matching = false }
 })
-

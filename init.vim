@@ -99,9 +99,12 @@ Plug 'hrsh7th/cmp-path'
 Plug 'hrsh7th/cmp-cmdline'
 Plug 'hrsh7th/cmp-vsnip'
 Plug 'hrsh7th/nvim-cmp'
-Plug 'L3MON4D3/LuaSnip'
-" Plug 'prichrd/netrw.nvim'
+Plug 'rcarriga/cmp-dap'
+Plug 'rafamadriz/friendly-snippets' " For Snippets
+Plug 'L3MON4D3/LuaSnip', {'tag': 'v2.*', 'do': 'make install_jsregexp'} " Replace <CurrentMajor> by the latest released major (first number of latest release)
 Plug 'saadparwaiz1/cmp_luasnip'
+Plug 'DreamMaoMao/yazi.nvim'
+" Plug 'prichrd/netrw.nvim'
 " Plug 'ms-jpq/coq.artifacts', {'branch': 'artifacts'}
 " Plug 'ms-jpq/coq_nvim', {'branch': 'coq'}
 " Plug 'ms-jpq/coq.thirdparty', {'branch': '3p'}
@@ -112,6 +115,7 @@ Plug 'sbdchd/neoformat'
 Plug 'szw/vim-maximizer'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-fugitive'
+Plug 'akinsho/git-conflict.nvim'
 Plug 'startup-nvim/startup.nvim'
 Plug 'nvim-lualine/lualine.nvim'
 Plug 'tpope/vim-surround'
@@ -157,10 +161,11 @@ Plug 'jay-babu/mason-nvim-dap.nvim'
 Plug 'jayp0521/mason-null-ls.nvim'
 Plug 'danymat/neogen'
 Plug 'SmiteshP/nvim-navic'
-Plug 'dccsillag/magma-nvim', { 'do': ':UpdateRemotePlugins', 'commit': '0fcd00cdbe167b1a5e3315ff737f6f01fc99d491' }
+" Plug 'dccsillag/magma-nvim', { 'do': ':UpdateRemotePlugins', 'commit': '0fcd00cdbe167b1a5e3315ff737f6f01fc99d491' }
+" Plug 'dccsillag/magma-nvim', { 'do': ':UpdateRemotePlugins' }
 " Plug 'WhiteBlackGoose/magma-nvim-goose', { 'do': ':UpdateRemotePlugins' }
 " Plug 'meatballs/notebook.nvim'
-" Plug 'benlubas/molten-nvim'
+Plug 'benlubas/molten-nvim', { 'do': ':UpdateRemotePlugins' }
 Plug '3rd/image.nvim'
 Plug 'lewis6991/gitsigns.nvim' " OPTIONAL: for git status
 Plug 'norcalli/nvim-colorizer.lua'
@@ -224,10 +229,10 @@ let g:loaded_matchit = 1
 " autocmd! BufReadPost,BufNewFile * :setlocal winbar=
 
 " highlight IndentBlanklineContextChar guifg=#fff000 gui=nocombine
-noremap <silent> <c-h> :<C-U>TmuxNavigateLeft<cr>
+noremap <silent> <a-h> :<C-U>TmuxNavigateLeft<cr>
 noremap <silent> <c-j> :<C-U>TmuxNavigateDown<cr>
 noremap <silent> <c-k> :<C-U>TmuxNavigateUp<cr>
-noremap <silent> <c-l> :<C-U>TmuxNavigateRight<cr>
+noremap <silent> <a-l> :<C-U>TmuxNavigateRight<cr>
 
 
 
@@ -239,6 +244,7 @@ let maplocalleader = " "
 
 let g:magma_automatically_open_output = v:false
 let g:magma_image_provider = "ueberzug"
+let g:molten_image_provider = "image.nvim"
 autocmd BufEnter <buffer> execute 'cd' '%:p:h'
 autocmd BufNewFile,BufRead,BufEnter *.typst   set filetype=typst
 autocmd FileType * highlight rainbowcol1 guifg=#61AFEF gui=bold

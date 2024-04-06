@@ -23,7 +23,10 @@ require("mason-lspconfig").setup({
 		"vimls",
 		"rust_analyzer",
 		"typst_lsp",
-		"taplo"
+		"taplo",
+		"jsonls",
+		"csharp_ls",
+		"lemminx",
 	},
 })
 
@@ -37,6 +40,5 @@ require("mason-nvim-dap").setup({
 require("mason-null-ls").setup({
 	automatic_setup = true,
 	automatic_installation = true,
-	ensure_installed = { "stylua", "shellharden", "astyle", "black", "beautysh", "cpptools", "yamlfmt", "flake8",
-		"jedi-language-server" },
+	ensure_installed = { "stylua", "shellharden", "astyle", "black", "beautysh", "cpptools", "yamlfmt", "flake8", "jedi-language-server", "mypy", "ruff" },
 })

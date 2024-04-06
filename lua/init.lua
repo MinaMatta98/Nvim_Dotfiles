@@ -3,4 +3,4 @@
 require("initialization.init")
 require("lsp.init")
 require("utilities.init")
-require("dap-python").setup("~/.virtualenvs/debugpy/bin/python")
+require("dap-python").setup("~/micromamba/envs/ML/bin/python3")

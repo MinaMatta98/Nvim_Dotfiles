@@ -49,7 +49,7 @@ local rust_opts = {
 				-- enable clippy on save
 				checkOnSave = {
 					command = "clippy",
-					extraArgs = { "--all", "--", "-W", "clippy::all" },
+					extraArgs = { "--all", "--", "-W", "clippy::all", "-D", "inactive-code" },
 				},
 				rustfmt = {
 					override_command = { "leptosfmt", "--rustfmt" }
