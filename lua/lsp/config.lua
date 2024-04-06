@@ -6,12 +6,8 @@ local global_on_attach = function(client, bufnr)
 	vim.opt.pumblend = 0
 
 	if client.name == "rust_analyzer" then
-		vim.keymap.set(
-			"n",
-			"<leader>O",
-			"<cmd>lua require'rust-tools'.open_cargo_toml.open_cargo_toml()<CR>",
-			{ buffer = bufnr }
-		)
+		vim.keymap.set("n", "<leader>O", "<cmd>lua require'rust-tools'.open_cargo_toml.open_cargo_toml()<CR>",
+			{ buffer = bufnr })
 		vim.keymap.set("n", "<leader>R", "<cmd>RustRun<CR>", { buffer = bufnr })
 		vim.keymap.set("n", "<leader>A", "<cmd>RustCodeAction<CR>", { buffer = bufnr })
 	end
@@ -20,7 +16,8 @@ local global_on_attach = function(client, bufnr)
 		require("luasnip-latex-snippets").setup({})
 	end
 
-	if client.name == "csharp_ls" or client.name == "jedi_language_server" then
+	-- Not equal?
+	if client.name ~= "rust_analyzer" then
 		vim.keymap.set({ "v", "n" }, "<leader>A", require("actions-preview").code_actions)
 	end
 
@@ -160,11 +157,6 @@ local global_on_attach = function(client, bufnr)
 					annotation_convention = "xmldoc", -- for a full list of annotation_conventions, see supported-languages below,
 				},
 			},
-			-- ['cs.xmldoc'] = require('neogen.configurations.cs'),
-			-- ['cpp.doxygen'] = require('neogen.configurations.cpp'),
-			-- ['python.numpydoc'] = require('neogen.configurations.python'),
-			-- ['rust.rustdoc'] = require('neogen.configurations.rust'),
-			-- ['javascript.jsdoc'] = require('neogen.configurations.jsdoc')
 		},
 	})
 
@@ -182,6 +174,16 @@ local global_on_attach = function(client, bufnr)
 	-- Mappings.
 	-- See `:help vim.lsp.*` for documentation on any of the below functions
 	local bufopts = { noremap = true, silent = true, buffer = bufnr }
+
+
+	local openUrl = function()
+		local url = string.match(vim.fn.getline("."), "[a-z]*://[^ >,;():]*")
+		if url ~= "" then
+			vim.cmd('exec "!firefox \'' .. url .. '\'"')
+		else
+			vim.cmd('echo "No URI found in line."')
+		end
+	end
 
 	vim.keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", bufopts)
 	vim.keymap.set("n", "gt", "<cmd>lua vim.lsp.buf.type_definition()<CR>", bufopts)
@@ -208,37 +210,15 @@ local global_on_attach = function(client, bufnr)
 	vim.keymap.set("n", "<leader>tn", "<cmd>lua require('neotest').jump.next({status = 'failed'})<CR>", bufopts)
 	vim.keymap.set("n", "<leader>tN", "<cmd>lua require('neotest').jump.prev({status = 'failed'})<CR>", bufopts)
 	vim.keymap.set("n", "<leader>td", "<cmd>lua require('neotest').run.run({strategy = 'dap'})<CR>", bufopts)
-
-	local openUrl = function()
-		local url = string.match(vim.fn.getline("."), "[a-z]*://[^ >,;():]*")
-		if url ~= "" then
-			vim.cmd('exec "!firefox \'' .. url .. '\'"')
-		else
-			vim.cmd('echo "No URI found in line."')
-		end
-	end
 	vim.keymap.set("n", "gx", openUrl, { desc = "OpenUrl Undercurword" })
-	-- vim.api.nvim_set_keymap("n", "gx", [[ <Cmd>lua HandleURL()<CR> ]], {})
-	vim.keymap.set(
-		"n",
-		"<leader>B",
-		"<cmd>lua require'dap'.set_breakpoint(vim.fn.input('Breakpoint Condition: '))<CR>",
-		bufopts
-	)
-	-- vim.keymap.set("x", "<leader>ja", "<cmd>MagmaEvaluateVisual<CR>", bufopts)
-	-- vim.keymap.set("n", "<leader>ji", "<cmd>MagmaInit<CR>", bufopts)
-	-- vim.keymap.set("n", "<leader>jj", "<cmd>MagmaEvaluateLine<CR>", bufopts)
-	-- vim.keymap.set("n", "<leader>jr", "<cmd>MagmaReevaluateCell<CR>", bufopts)
-	-- vim.keymap.set("n", "<leader>js", "<cmd>MagmaShowOutput<CR>", bufopts)
-	-- vim.keymap.set("n", "<leader>jd", "<cmd>MagmaDelete<CR>", bufopts)
-
+	vim.keymap.set("n", "<leader>B", "<cmd>lua require'dap'.set_breakpoint(vim.fn.input('Breakpoint Condition: '))<CR>",
+		bufopts)
 	vim.keymap.set("x", "<leader>ja", "<cmd>MoltenEvaluateVisual<CR>", bufopts)
 	vim.keymap.set("n", "<leader>ji", "<cmd>MoltenInit<CR>", bufopts)
 	vim.keymap.set("n", "<leader>jj", "<cmd>MoltenEvaluateLine<CR>", bufopts)
 	vim.keymap.set("n", "<leader>jr", "<cmd>MoltenReevaluateCell<CR>", bufopts)
 	vim.keymap.set("n", "<leader>js", "<cmd>MoltenShowOutput<CR>", bufopts)
 	vim.keymap.set("n", "<leader>jd", "<cmd>MoltenDelete<CR>", bufopts)
-
 	vim.keymap.set("v", "<leader>ds", "<ESC>:lua require('dap-python').debug_selection()<CR>", bufopts)
 
 	local signs = {
@@ -257,11 +237,6 @@ local global_on_attach = function(client, bufnr)
 		border = "rounded",
 		close_events = { "CursorMoved", "BufHidden", "InsertCharPre" },
 	})
-	vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
-		border = "rounded",
-	})
-	vim.lsp.handlers["textDocument/signatureHelp"] =
-		vim.lsp.with(vim.lsp.handlers.signature_help, { border = "rounded" })
 
 	vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
 		border = "rounded",
@@ -341,7 +316,6 @@ for _, server_name in ipairs(list) do
 		on_attach = global_on_attach,
 	})
 end
-
 
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities.offsetEncoding = { "utf-16" }

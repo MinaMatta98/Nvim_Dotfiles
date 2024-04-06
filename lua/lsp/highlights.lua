@@ -25,7 +25,7 @@ require("nvim-treesitter.configs").setup({
 			show_help = "?",
 		},
 	},
-	ensure_installed = { "c", "lua", "rust", "cpp", "javascript" },
+	ensure_installed = { "c", "lua", "rust", "cpp", "javascript", "c_sharp", "make", "python", "cpp", "go" },
 	matchup = {
 		enable = true,
 	},
@@ -42,6 +42,8 @@ require("nvim-treesitter.configs").setup({
 	auto_install = true,
 	-- List of parsers to ignore installing (for "all")
 	ignore_install = { "javascript" },
+
+	disable = { "lua" },
 	---- If you need to change the installation directory of the parsers (see -> Advanced Setup)
 	-- parser_install_dir = "/some/path/to/store/parsers", -- Remember to run vim.opt.runtimepath:append("/some/path/to/store/parsers")!
 
@@ -57,6 +59,7 @@ require("nvim-treesitter.configs").setup({
 		-- Instead of true it can also be a list of languages
 		additional_vim_regex_highlighting = false,
 		max_file_lines = 6000,
+		-- disable = { "lua" },
 		disable = function(_, bufnr)
 			return vim.api.nvim_buf_line_count(bufnr) > 10000
 		end,
