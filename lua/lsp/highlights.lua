@@ -25,7 +25,7 @@ require("nvim-treesitter.configs").setup({
 			show_help = "?",
 		},
 	},
-	ensure_installed = { "c", "lua", "rust", "cpp", "javascript", "c_sharp", "make", "python", "cpp", "go" },
+	ensure_installed = { "c", "lua", "rust", "cpp", "javascript", "c_sharp", "make", "python", "cpp", "go", "markdown", "markdown_inline" },
 	matchup = {
 		enable = true,
 	},

@@ -41,8 +41,8 @@ local config = {
 		name = "launch - netcoredbg",
 		request = "launch",
 		justMyCode = false,
-		stopOnEntry = false,
-		stopAtEntry = false,
+		-- stopOnEntry = false,
+		-- stopAtEntry = false,
 		cwd = '${workspaceFolder}',
 		env = {
 			ASPNETCORE_ENVIRONMENT = function()
@@ -51,7 +51,7 @@ local config = {
 			end,
 			ASPNETCORE_URLS = function()
 				-- todo: request input from ui
-				return "http://localhost:5238"
+				return "http://localhost:5112"
 			end,
 		},
 		program = function()

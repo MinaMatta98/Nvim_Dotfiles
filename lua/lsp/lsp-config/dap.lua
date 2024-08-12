@@ -115,7 +115,120 @@ dap.adapters.coreclr = {
 	args = { '--interpreter=vscode' }
 }
 
+
+dap.adapters.codelldb = {
+	type = 'executable',
+	command = 'lldb-vscode',
+	cwd = '${workspaceFolder}',
+}
+
+dap.configurations.rust = dap.adapters.codelldb
+
 dap.configurations.cs = require("lsp.dotnet")
+
+local mason = require 'mason-registry';
+
+
+require('dap-vscode-js').setup({
+	adapters = { 'pwa-node', 'pwa-chrome', 'pwa-msedge', 'node-terminal', 'pwa-extensionHost' }, -- which adapters to register in nvim-dap
+	-- debugger_path = "/home/mina/nvim/mason/packages/vscode-js-debug",                         -- Path to vscode-js-debug installation.
+	debugger_path = mason.get_package('js-debug-adapter'):get_install_path(),                 -- Path to vscode-js-debug installation.
+})
+
+-- local dap_status_ok, dap = pcall(require, "dap")
+-- if not dap_status_ok then
+-- 	return
+-- end
+
+-- dap.adapters["pwa-node"] = {
+-- 	type = "server",
+-- 	host = "localhost",
+-- 	port = "${port}", --let both ports be the same for now...
+-- 	executable = {
+-- 		command = "node",
+-- 		-- -- 💀 Make sure to update this path to point to your installation
+-- 		args = { "/home/mina/nvim/mason/packages/vscode-js-debug" },
+-- 		-- command = "js-debug-adapter",
+-- 		-- args = { "${port}" },
+-- 	},
+-- }
+
+for _, language in ipairs({ "typescript", "javascript" }) do
+	dap.configurations[language] = {
+		{
+			type = "pwa-node",
+			request = "launch",
+			name = "Laycn Current File (pwa-node with ts-node)",
+			cwd = "${workspaceFolder}",
+			runtimeArgs = { "--loader", "ts-node/esm" },
+			runtimeExecutable = "node",
+			args = { "${file}" },
+			sourceMaps = true,
+			protocol = "inspector",
+			skipFiles = { '<node_internals>/**', 'node_modules/**' },
+			resolveSourceMapLocations = {
+				"${workspaceFolder}/**",
+				"!**/node_modules/**",
+			}
+		},
+		-- {
+		-- 	type = 'pwa-node',
+		-- 	request = 'launch',
+		-- 	name = 'Launch Current File (pwa-node)',
+		-- 	cwd = "${workspaceFolder}", -- vim.fn.getcwd(),
+		-- 	args = { '${file}' },
+		-- 	sourceMaps = true,
+		-- 	protocol = 'inspector',
+		-- 	console = 'integratedTerminal'
+		-- },
+		{
+			type = 'pwa-node',
+			request = 'launch',
+			name = 'Launch Current File (Typescript)',
+			cwd = "${workspaceFolder}",
+			runtimeArgs = { '--loader=ts-node/esm' },
+			program = "${file}",
+			runtimeExecutable = 'node',
+			-- args = { '${file}' },
+			sourceMaps = true,
+			protocol = 'inspector',
+			outFiles = { "${workspaceFolder}/**/**/*", "!**/node_modules/**" },
+			skipFiles = { '<node_internals>/**', 'node_modules/**' },
+			resolveSourceMapLocations = {
+				"${workspaceFolder}/**",
+				"!**/node_modules/**",
+			},
+			console = 'integratedTerminal'
+		},
+		{
+			type = "pwa-chrome",
+			request = "launch",
+			name = "Launch and Debug Chrome",
+			url = function()
+				local co = coroutine.running()
+				return coroutine.create(
+					function()
+						vim.ui.input({
+							prompt = "Enter URL:",
+							default = "http://localhost:3000",
+						}, function(url)
+							if url == nill or url == "" then
+								return
+							else
+								coroutine.resume(co, url)
+							end
+						end)
+					end
+				)
+			end,
+			webroot = "${workspaceFolder}",
+			skipFiles = { '<node_internals>/**/*.js' },
+			protocol = 'inspector',
+			sourceMaps = true,
+			useDataDir = false
+		},
+	}
+end
 
 vim.fn.sign_define(
 	"DapBreakpoint",

@@ -54,6 +54,7 @@ nnoremap <silent><c-q> :FloatermNew --cwd=<buffer> --wintype=split --position=ri
 inoremap <silent><c-q> <Esc> :FloatermToggle<CR>
 tnoremap <c-q> <c-\><c-n> :FloatermToggle<CR>
 nnoremap <leader>P :lua vim.lsp.buf.format()<CR>
+nnoremap <leader>D :DBUIToggle<CR>
 " nnoremap <leader>F :Lf<CR>
 nnoremap <leader>F :Yazi<CR>
 nnoremap <leader>ff :lua require('telescope.builtin').find_files( { cwd = vim.fn.expand('%:p:h') })<CR>
@@ -81,11 +82,14 @@ endif
 " noremap <silent> <C-H> :TmuxNavigateLeft<CR>
 
 call plug#begin()
+Plug 'epwalsh/obsidian.nvim'
 Plug 'catppuccin/nvim', { 'as': 'catppuccin' }
 Plug 'dstein64/vim-startuptime'
 Plug 'airblade/vim-gitgutter'
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install' }
+Plug 'godlygeek/tabular'
+Plug 'preservim/vim-markdown'
 " Plug 'junegunn/fzf', {'dir': '~/.fzf', 'do': './install --all' }
 " Plug 'junegunn/fzf.vim'
 Plug 'Pocco81/dap-buddy.nvim'
@@ -188,7 +192,7 @@ Plug 'ggandor/leap.nvim'
 Plug 'quarto-dev/quarto-nvim'
 Plug 'jmbuhr/otter.nvim'
 Plug 'aznhe21/actions-preview.nvim',
-Plug 'anuvyklack/pretty-fold.nvim',
+" Plug 'anuvyklack/pretty-fold.nvim',
 Plug 'NicholasMata/nvim-dap-cs'
 Plug 'Decodetalkers/csharpls-extended-lsp.nvim'
 Plug 'tpope/vim-dadbod'
@@ -196,6 +200,11 @@ Plug 'kristijanhusak/vim-dadbod-completion'
 Plug 'kristijanhusak/vim-dadbod-ui'
 Plug 'tpope/vim-dotenv'
 Plug 'rouge8/neotest-rust'
+Plug 'jlcrochet/vim-razor'
+Plug 'Hoffs/omnisharp-extended-lsp.nvim'
+Plug 'pmizio/typescript-tools.nvim'
+Plug 'microsoft/vscode-js-debug'
+Plug 'mxsdev/nvim-dap-vscode-js'
 " This is required by vim-nuget
 " Plug 'PasiBergman/cmp-nuget'
 call plug#end()
@@ -205,6 +214,7 @@ set termguicolors
 endif
 
 " let g:markdown_fenced_languages = ['c', 'bash', 'javascript', 'go', 'zsh', 'python', 'diff']
+" let g:vim_markdown_folding_style_pythonic = 1
 let g:Powerline_symbols = 'fancy'
 let g:airline_powerline_fonts = 1
 let g:airline#extensions#tabline#enabled = 1
@@ -240,6 +250,12 @@ let g:tex_flavor='latex'
 let g:vimtex_view_method = 'zathura'
 let g:livepreview_previewer = 'alacritty -e zathura'
 let g:vimtex_compiler_method = 'latexmk'
+let g:db_ui_auto_execute_table_helpers = 1
+let g:db_ui_table_helpers = {
+\   'mysql': {
+\     'Select': 'SELECT * FROM "{table}"'
+\   }
+\ }
 let maplocalleader = " "
 
 let g:magma_automatically_open_output = v:false
@@ -248,8 +264,8 @@ let g:molten_image_provider = "image.nvim"
 autocmd BufEnter <buffer> execute 'cd' '%:p:h'
 autocmd BufNewFile,BufRead,BufEnter *.typst   set filetype=typst
 autocmd FileType * highlight rainbowcol1 guifg=#61AFEF gui=bold
-autocmd BufNewFile,BufRead *.cshtml set filetype=html.cshtml.razor
-autocmd BufNewFile,BufRead *.razor set filetype=html.cshtml.razor
+" autocmd BufNewFile,BufRead *.cshtml set filetype=html.cshtml.razor
+" autocmd BufNewFile,BufRead *.razor set filetype=html.cshtml.razor
 
 " let g:floaterm_height = 0.85
 let g:floaterm_opener = 'vsplit'

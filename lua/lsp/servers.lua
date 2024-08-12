@@ -27,6 +27,7 @@ require("mason-lspconfig").setup({
 		"jsonls",
 		"csharp_ls",
 		"lemminx",
+		"cssls"
 	},
 })
 
